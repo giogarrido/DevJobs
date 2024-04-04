@@ -8,15 +8,21 @@ const router = require("./routes");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
+const bodyParser = require("body-parser");
 
 
 require("dotenv").config({ path: "variables.env" });
 
 const app = express();
 
+// Habilitar body-parser
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 // Habilitar Handlebars como template engine
 app.engine("handlebars", exphbs.engine({
-    defaultLayout: "layout"
+    defaultLayout: "layout",
+    helpers: require("./helpers/handlebars")
 
 }));
 app.set("view engine", "handlebars");
