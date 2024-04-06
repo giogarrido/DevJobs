@@ -28,6 +28,7 @@ module.exports = {
       "MVC",
       "SASS",
       "WordPress",
+      "Java"
     ];
 
     let html = "";

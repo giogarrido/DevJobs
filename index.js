@@ -9,6 +9,8 @@ const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const bodyParser = require("body-parser");
+const flash = require("connect-flash");
+
 
 
 require("dotenv").config({ path: "variables.env" });
@@ -18,6 +20,7 @@ const app = express();
 // Habilitar body-parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
 
 // Habilitar Handlebars como template engine
 app.engine("handlebars", exphbs.engine({
@@ -39,6 +42,15 @@ app.use(session({
     saveUninitialized: false,
     store: new MongoStore({ mongoUrl: process.env.DATABASE})
 }));
+
+// Alertas y flash messages
+app.use(flash());
+
+// Crear nuestro middleware
+app.use((req, res, next) => {
+    res.locals.mensajes = req.flash();
+    next();
+});
 
 app.use("/", router());
 
