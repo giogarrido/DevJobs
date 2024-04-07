@@ -10,6 +10,7 @@ const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const bodyParser = require("body-parser");
 const flash = require("connect-flash");
+const passport = require("./config/passport");
 
 
 
@@ -42,6 +43,10 @@ app.use(session({
     saveUninitialized: false,
     store: new MongoStore({ mongoUrl: process.env.DATABASE})
 }));
+
+// inicializar passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Alertas y flash messages
 app.use(flash());
