@@ -1,3 +1,6 @@
+import axios from "axios";
+import Swal from "sweetalert2";
+
 document.addEventListener("DOMContentLoaded", () => {
   const skills = document.querySelector(".lista-conocimientos");
 
@@ -13,10 +16,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Una vez que estamos en editar, llamar la función
     skillsSeleccionados();
   }
+  const vacantesListado = document.querySelector(".panel-administracion");
+  if (vacantesListado) {
+    vacantesListado.addEventListener("click", accionesListado);
+  }
 });
 
 const skills = new Set();
-
 const agregarSkills = (e) => {
   if (e.target.tagName === "LI") {
     if (e.target.classList.contains("activo")) {
@@ -53,3 +59,46 @@ const limpiarAlertas = () => {
   }, 2000);
 
 }
+
+// Eliminar vacantes
+const accionesListado = (e) => {
+  e.preventDefault();
+
+  if (e.target.dataset.eliminar) {
+    // Eliminar por axios
+    Swal.fire({
+      title: "¿Confirmar eliminación?",
+      text: "Una vez eliminada, no se puede recuperar",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí, Eliminar",
+      cancelButtonText: "No, Cancelar",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Enviar petición a axios
+        const url = `${location.origin}/vacantes/eliminar/${e.target.dataset.eliminar}`;
+
+        // Axios para eliminar el registro
+        axios.delete(url, { params: { url } }).then((respuesta) => {
+          if (respuesta.status === 200) {
+            Swal.fire("¡Eliminado!", respuesta.data, "success");
+
+            // Eliminar del DOM
+            e.target.parentElement.parentElement.parentElement.removeChild(e.target.parentElement.parentElement)
+          }
+        })
+        .catch(() => {
+          Swal.fire({
+            icon: "error",
+            title: "Hubo un error",
+            text: "No se pudo eliminar",
+          });
+        });
+      }
+    });
+  } else if (e.target.tagName === "A") {
+    window.location.href = e.target.href;
+  }
+};

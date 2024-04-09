@@ -1,10 +1,13 @@
+const { body, validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 const Vacante = mongoose.model('Vacante');
 
 exports.formularioNuevaVacante = (req, res) => {
     res.render('nueva-vacante', {
         nombrePagina: 'Nueva Vacante',
-        tagline: 'Llena el formulario y publica tu vacante'
+        tagline: 'Llena el formulario y publica tu vacante',
+        cerrarSesion: true,
+        nombre: req.user.nombre,
     });
 }
 
@@ -47,7 +50,9 @@ exports.formEditarVacante = async (req, res, next) => {
 
     res.render('editar-vacante', {
         vacante,
-        nombrePagina: `Editar - ${vacante.titulo}`
+        nombrePagina: `Editar - ${vacante.titulo}`,
+        cerrarSesion: true,
+        nombre: req.user.nombre,
     });
 
 }
@@ -62,5 +67,63 @@ exports.editarVacante = async (req, res) => {
     });
 
     res.redirect(`/vacantes/${vacante.url}`);
+}
+
+// Validar y sanitizar los campos de las nuevas vacantes
+
+exports.validarVacante = async(req, res, next) => {
+    // sanitizar y validar los campos
+
+    const rules= [
+        body('titulo').not().isEmpty().withMessage('Agrega un título a la vacante').escape(),
+        body('empresa').not().isEmpty().withMessage('Agrega una empresa').escape(),
+        body('ubicacion').not().isEmpty().withMessage('Agrega una ubicación').escape(),
+        body('contrato').not().isEmpty().withMessage('Selecciona el tipo de contrato').escape(),
+        body('salario').escape(),
+        body('skills').not().isEmpty().withMessage('Agrega al menos una habilidad').escape()
+    ];
+
+    // Validar los campos
+    await Promise.all(rules.map(validation => validation.run(req)));
+    const errores = validationResult(req);
+
+    if(!errores.isEmpty()){
+        req.flash('error', errores.array().map(error => error.msg));
+        res.render('nueva-vacante', {
+            nombrePagina: 'Nueva Vacante',
+            tagline: 'Llena el formulario y publica tu vacante',
+            cerrarSesion: true,
+            nombre: req.user.nombre,
+            mensajes: req.flash()
+        });
+        return;
+        
+     }
+    next(); // siguiente middleware
+}
+
+// Eliminar vacante
+exports.eliminarVacante = async (req, res) => {
+    const { id } = req.params;
+
+    const vacante = await Vacante.findById(id);
+
+    if(verificarAutor(vacante, req.user)){
+        // todo bien, eliminar
+        await Vacante.findByIdAndDelete(id);
+
+        res.status(200).send('Vacante eliminada correctamente');
+    } else {
+        // no permitido
+        res.status(403).send('Error');
+    }
+
+}
+
+const verificarAutor = (vacante = {}, usuario = {}) => {
+    if(!vacante.autor.equals(usuario._id)) {
+        return false
+    } 
+    return true;
 }
 
