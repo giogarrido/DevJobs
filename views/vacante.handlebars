@@ -35,8 +35,24 @@
         <h2>Conocimientos Deseados</h2>
         <ul class="skills">
             {{#each vacante.skills}}
-                <li>{{this}}</li>
+            <li>{{this}}</li>
             {{/each}}
         </ul>
+    </aside>
+</div>
+
+<div class="contenedor datos-reclutador">
+    <div class="enviar-datos">
+
+    </div>
+    <div class="info-reclutador">
+        <h2>Información Reclutador</h2>
+        {{#if vacante.autor.nombre}}
+        <p>{{vacante.autor.nombre}}</p>
+        {{/if}}
+        {{#if vacante.autor.imagen}}
+        <img src="/uploads/perfiles/{{vacante.autor.imagen}}" alt="Imagen Reclutador">
+        {{/if}}
+    </div>
 
 </div>
