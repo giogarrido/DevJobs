@@ -80,5 +80,19 @@ module.exports = () => {
     usuariosController.editarPerfil
   );
 
+  // Recibir mensajes de candidatos
+  router.post(
+    "/vacantes/:url",
+    vacantesController.subirCV,
+    vacantesController.contactar
+  );
+
+  // Mostrar candidatos por vacante
+  router.get(
+    "/candidatos/:id",
+    authController.verificarUsuario,
+    vacantesController.mostrarCandidatos
+  );
+
   return router;
 };
